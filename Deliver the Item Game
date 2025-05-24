@@ -1,0 +1,617 @@
+import tkinter as tk
+import random
+from PIL import Image, ImageTk
+from tkinter import Canvas, Menu
+import tkinter.messagebox as msgbox
+
+
+
+
+boardspace = tk.Tk()
+boardspace.geometry("1000x800")
+boardspace.title("DELIVER THE ITEM CUSTOM BOARD GAME")
+boardspace.minsize(1000, 800)
+boardspace.maxsize(1000, 800)
+
+
+
+
+Police_Decision_Path = {
+    1: ImageTk.PhotoImage(Image.open("Bribe_Decision_Path.png")),
+    2: ImageTk.PhotoImage(Image.open("Inspection_Decision_Path.png")),
+    3: ImageTk.PhotoImage(Image.open("Avoid_Decision_Path.png")),
+    4: ImageTk.PhotoImage(Image.open("Inspection_Decision_Path.png")),
+    5: ImageTk.PhotoImage(Image.open("Avoid_Decision_Path.png")),
+    6: ImageTk.PhotoImage(Image.open("Continue_Road_Game_asset.png")),
+}
+
+def police_Decision():
+
+    police_decision = random.randint(1,6)
+    policeDecision_label.config(image = Police_Decision_Path[police_decision])
+    policeDecision_label.image = Police_Decision_Path
+
+
+
+
+Inspection_Decision_Path = {
+    1: ImageTk.PhotoImage(Image.open("Interrogate_Decision_Path.png")),
+    2: ImageTk.PhotoImage(Image.open("Continue_Road_Game_asset.png")),
+    3: ImageTk.PhotoImage(Image.open("Contraband_Decision_Path.png")),
+    4: ImageTk.PhotoImage(Image.open("Interrogate_Decision_Path.png")),
+    5: ImageTk.PhotoImage(Image.open("Continue_Road_Game_asset.png")),
+    6: ImageTk.PhotoImage(Image.open("Contraband_Decision_Path.png")),
+    
+
+}
+
+gameOver_Label = tk.Label(boardspace, width=400, height=95, bg="white")
+gameOver_Label.place_forget()  
+game_over_visible = False
+
+class AnimatedGif:
+    def __init__(self, label, gif_path):
+        self.label = label
+        self.gif = Image.open(gif_path)
+        self.frames = []
+
+        try:
+            for i in range(self.gif.n_frames):
+                self.gif.seek(i)
+                frame = ImageTk.PhotoImage(self.gif.copy())
+                self.frames.append(frame)
+        except Exception as e:
+            print(f"Error loading GIF frames: {e}")
+            return
+
+        self.current_frame = 0
+        self.running = True
+        self.update()
+
+    def update(self):
+        if not self.running:
+            return
+        self.label.config(image=self.frames[self.current_frame])
+        self.label.image = self.frames[self.current_frame]
+        self.current_frame = (self.current_frame + 1) % len(self.frames)
+        self.label.after(300, self.update)
+
+    def stop(self):
+        self.running = False
+        self.label.config(image="")
+
+
+
+def police_Inspection():
+    global player1_currentCell, player2_currentCell, game_over_visible, current_gif_animator
+
+    inspection = random.randint(1, 6)
+    policeInspection_label.config(image=Inspection_Decision_Path[inspection])
+    policeInspection_label.image = Inspection_Decision_Path
+
+    if inspection in (3, 6):
+        if selected_player.get() == "Player 1" and not game_over_visible:
+            gameOver_Label.place(x=350, y=10)
+            current_gif_animator = AnimatedGif(gameOver_Label, "Player1_Win_You_gotArrested.gif")
+            game_over_visible = True
+        elif selected_player.get() == "Player 2" and not game_over_visible:
+            gameOver_Label.place(x=350, y=10)
+            current_gif_animator = AnimatedGif(gameOver_Label, "Player2_Win_You_gotArrested.gif")
+            game_over_visible = True
+    else:
+        if game_over_visible:
+            gameOver_Label.place_forget()
+            game_over_visible = False
+            current_gif_animator = None
+
+
+
+
+
+
+Tanod_Decision_Path = {
+    1: ImageTk.PhotoImage(Image.open("Bribe_Decision_Path.png")),
+    2: ImageTk.PhotoImage(Image.open("Avoid_Decision_Path.png")),
+    3: ImageTk.PhotoImage(Image.open("Continue_Road_Game_asset.png")),
+    4: ImageTk.PhotoImage(Image.open("Avoid_Decision_Path.png")),
+    5: ImageTk.PhotoImage(Image.open("Avoid_Decision_Path.png")),
+    6: ImageTk.PhotoImage(Image.open("Continue_Road_Game_asset.png")),
+    7: ImageTk.PhotoImage(Image.open("Thug_Game_asset.png")),
+    8: ImageTk.PhotoImage(Image.open("Thug_Game_asset.png")),
+}
+
+def Tanod_Decision():
+    
+    tanod_decision = random.randint(1,8)
+    tanodDecision_label.config(image=Tanod_Decision_Path[tanod_decision])
+    tanodDecision_label.image = Tanod_Decision_Path
+
+
+Main_Stop_Scenarios = {
+    1: ImageTk.PhotoImage(Image.open("Police_game_asset.png")),
+    2: ImageTk.PhotoImage(Image.open("Tanod_Game_asset.png")),
+    3: ImageTk.PhotoImage(Image.open("Thug_Game_asset.png")),
+    4: ImageTk.PhotoImage(Image.open("Continue_Road_Game_asset.png")),
+    5: ImageTk.PhotoImage(Image.open("Tanod_Game_asset.png")),
+    6: ImageTk.PhotoImage(Image.open("Police_game_asset.png")),
+    7: ImageTk.PhotoImage(Image.open("Thug_Game_asset.png")),
+    8: ImageTk.PhotoImage(Image.open("Continue_Road_Game_asset.png"))
+}
+
+def choose_Fate():
+    fate = random.randint(1, 8)
+    fate_label.config(image=Main_Stop_Scenarios[fate])  
+    fate_label.image = Main_Stop_Scenarios[fate]
+
+
+
+
+dice_images = {
+    1: ImageTk.PhotoImage(Image.open("dice1.png")),
+    2: ImageTk.PhotoImage(Image.open("dice2.png")),
+    3: ImageTk.PhotoImage(Image.open("dice3.png")),
+    4: ImageTk.PhotoImage(Image.open("dice4.png")),  
+    5: ImageTk.PhotoImage(Image.open("dice5.png")),
+    6: ImageTk.PhotoImage(Image.open("dice6.png")),
+}
+
+def roll_Dice():
+    toss = random.randint(1, 6)
+    dice_label.config(image = dice_images[toss])
+    dice_label.image = dice_images[toss]
+
+
+
+cell_img1 = ImageTk.PhotoImage(Image.open("Road1.png"))
+cell_img2 = ImageTk.PhotoImage(Image.open("Road2.png"))
+cell_img3 = ImageTk.PhotoImage(Image.open("Road3.png"))
+cell_img4 = ImageTk.PhotoImage(Image.open("Road4.png"))
+cell_img5 = ImageTk.PhotoImage(Image.open("Road5.png"))
+cell_img6 = ImageTk.PhotoImage(Image.open("Road6.png"))
+cell_img7 = ImageTk.PhotoImage(Image.open("Road7.png"))
+cell_img8 = ImageTk.PhotoImage(Image.open("Road8.png"))
+cell_img9 = ImageTk.PhotoImage(Image.open("Road9.png"))
+cell_img10 = ImageTk.PhotoImage(Image.open("Road10.png"))
+cell_img11 = ImageTk.PhotoImage(Image.open("Road11.png"))
+cell_img12 = ImageTk.PhotoImage(Image.open("Road12.png"))
+cell_img13 = ImageTk.PhotoImage(Image.open("Road13.png"))
+cell_img14 = ImageTk.PhotoImage(Image.open("Road14.png"))
+cell_img15 = ImageTk.PhotoImage(Image.open("Road15.png"))
+cell_img16 = ImageTk.PhotoImage(Image.open("Road16.png"))
+cell_img17 = ImageTk.PhotoImage(Image.open("Road17.png"))
+cell_img18 = ImageTk.PhotoImage(Image.open("Road18.png"))
+cell_img19 = ImageTk.PhotoImage(Image.open("Road19.png"))
+cell_img20 = ImageTk.PhotoImage(Image.open("Road20.png"))
+cell_img21 = ImageTk.PhotoImage(Image.open("Road21.png"))
+cell_img22 = ImageTk.PhotoImage(Image.open("Road22.png"))
+cell_img23 = ImageTk.PhotoImage(Image.open("Road23.png"))
+cell_img24 = ImageTk.PhotoImage(Image.open("Road24.png"))
+cell_img25 = ImageTk.PhotoImage(Image.open("Road25.png"))
+cell_img26 = ImageTk.PhotoImage(Image.open("Road26.png"))
+cell_img27 = ImageTk.PhotoImage(Image.open("Road27.png"))
+cell_img28 = ImageTk.PhotoImage(Image.open("Road28.png"))
+cell_img29 = ImageTk.PhotoImage(Image.open("Road29.png"))
+cell_img30 = ImageTk.PhotoImage(Image.open("Road30.png"))
+cell_img31 = ImageTk.PhotoImage(Image.open("Road31.png"))
+cell_img32 = ImageTk.PhotoImage(Image.open("Road32.png"))
+cell_img33 = ImageTk.PhotoImage(Image.open("Road33.png"))
+cell_img34 = ImageTk.PhotoImage(Image.open("Road34.png"))
+cell_img35 = ImageTk.PhotoImage(Image.open("Road35.png"))
+cell_img36 = ImageTk.PhotoImage(Image.open("Road36.png"))
+
+
+def gridboard_levels(offset_x= 300,offset_y=150):
+    gridSize = 6
+    cellSize = 75
+
+    for row in range(gridSize):
+        for column in range(gridSize):
+            x1 = offset_x + column * cellSize
+            y1 = offset_y + row * cellSize
+            x2 = x1 + cellSize
+            y2 = y1 + cellSize
+
+            
+            canvas.create_rectangle(x1, y1, x2, y2, fill="white", outline="black")
+
+            if row == 5 and column == 0:
+                canvas.create_image(x1,y1, image = cell_img1, anchor='nw')
+            elif row == 5 and column == 1:
+                canvas.create_image(x1,y1, image = cell_img2, anchor='nw')
+            elif row == 5 and column == 2:
+                canvas.create_image(x1,y1, image = cell_img3, anchor='nw')
+            elif row == 5 and column == 3:
+                canvas.create_image(x1,y1, image = cell_img4, anchor='nw')
+            elif row == 5 and column == 4:
+                canvas.create_image(x1,y1, image = cell_img5, anchor='nw')
+            elif row == 5 and column == 5:
+                canvas.create_image(x1,y1, image = cell_img6, anchor='nw')
+            elif row == 4 and column == 5:
+                canvas.create_image(x1,y1, image = cell_img7, anchor='nw')
+            elif row == 4 and column == 4:
+                canvas.create_image(x1,y1, image = cell_img8, anchor='nw')
+            elif row == 4 and column == 3:
+                canvas.create_image(x1,y1, image = cell_img9, anchor='nw')
+            elif row == 4 and column == 2:
+                canvas.create_image(x1,y1, image = cell_img10, anchor='nw')
+            elif row == 4 and column == 1:
+                canvas.create_image(x1,y1, image = cell_img11, anchor='nw')
+            elif row == 4 and column == 0:
+                canvas.create_image(x1,y1, image = cell_img12, anchor='nw')
+            elif row == 3 and column == 0:
+                canvas.create_image(x1,y1, image = cell_img13, anchor='nw')
+            elif row == 3 and column == 1:
+                canvas.create_image(x1,y1, image = cell_img14, anchor='nw')
+            elif row == 3 and column == 2:
+                canvas.create_image(x1,y1, image = cell_img15, anchor='nw')
+            elif row == 3 and column == 3:
+                canvas.create_image(x1,y1, image = cell_img16, anchor='nw')
+            elif row == 3 and column == 4:
+                canvas.create_image(x1,y1, image = cell_img17, anchor='nw')
+            elif row == 3 and column == 5:
+                canvas.create_image(x1,y1, image = cell_img18, anchor='nw')
+            elif row == 2 and column == 5:
+                canvas.create_image(x1,y1, image = cell_img19, anchor='nw')
+            elif row == 2 and column == 4:
+                canvas.create_image(x1,y1, image = cell_img20, anchor='nw')
+            elif row == 2 and column == 3:
+                canvas.create_image(x1,y1, image = cell_img21, anchor='nw')
+            elif row == 2 and column == 2:
+                canvas.create_image(x1,y1, image = cell_img22, anchor='nw')
+            elif row == 2 and column == 1:
+                canvas.create_image(x1,y1, image = cell_img23, anchor='nw')
+            elif row == 2 and column == 0:
+                canvas.create_image(x1,y1, image = cell_img24, anchor='nw')
+            elif row == 1 and column == 0:
+                canvas.create_image(x1,y1, image = cell_img25, anchor='nw')
+            elif row == 1 and column == 1:
+                canvas.create_image(x1,y1, image = cell_img26, anchor='nw')
+            elif row == 1 and column == 2:
+                canvas.create_image(x1,y1, image = cell_img27, anchor='nw')
+            elif row == 1 and column == 3:
+                canvas.create_image(x1,y1, image = cell_img28, anchor='nw')
+            elif row == 1 and column == 4:
+                canvas.create_image(x1,y1, image = cell_img29, anchor='nw')
+            elif row == 1 and column == 5:
+                canvas.create_image(x1,y1, image = cell_img30, anchor='nw')
+            elif row == 0 and column == 5:
+                canvas.create_image(x1,y1, image = cell_img31, anchor='nw')
+            elif row == 0 and column == 4:
+                canvas.create_image(x1,y1, image = cell_img32, anchor='nw')
+            elif row == 0 and column == 3:
+                canvas.create_image(x1,y1, image = cell_img33, anchor='nw')
+            elif row == 0 and column == 2:
+                canvas.create_image(x1,y1, image = cell_img34, anchor='nw')
+            elif row == 0 and column == 1:
+                canvas.create_image(x1,y1, image = cell_img35, anchor='nw')
+            elif row == 0 and column == 0:
+                canvas.create_image(x1,y1, image = cell_img36, anchor='nw')   
+
+
+def get_coordinates_from_cell(cell_number):
+    row_col_path = [
+        (5, 0), (5, 1), (5, 2), (5, 3), (5, 4), (5, 5),
+        (4, 5), (4, 4), (4, 3), (4, 2), (4, 1), (4, 0),
+        (3, 0), (3, 1), (3, 2), (3, 3), (3, 4), (3, 5),
+        (2, 5), (2, 4), (2, 3), (2, 2), (2, 1), (2, 0),
+        (1, 0), (1, 1), (1, 2), (1, 3), (1, 4), (1, 5),
+        (0, 5), (0, 4), (0, 3), (0, 2), (0, 1), (0, 0)
+    ]
+    return row_col_path[cell_number - 1]
+
+canvas = tk.Canvas(boardspace, bg="#4e341d", width=1000, height=800)
+canvas.pack()
+
+
+start_img = ImageTk.PhotoImage(Image.open("Start.png"))
+finish_img = ImageTk.PhotoImage(Image.open("Finish.png"))
+
+canvas.create_image(270, 500, image=start_img, anchor='center')
+canvas.create_image(270, 130, image=finish_img, anchor='center')
+
+
+player1_img = ImageTk.PhotoImage(Image.open("Player1.png"))
+player2_img = ImageTk.PhotoImage(Image.open("Player2.png"))
+
+player1_start_pos = (240, 530)
+player2_start_pos = (240, 560)
+
+
+player1 = canvas.create_image(player1_start_pos, image=player1_img, anchor='center')
+player2 = canvas.create_image(player2_start_pos, image=player2_img, anchor='center')
+
+
+dice_label = tk.Label(boardspace, text="", font=("Arial", 24), bg="#4e341d", fg="#FFFFFF")
+dice_label.place(x=100, y=50)
+
+fate_label = tk.Label(boardspace, text="", font=("Arial",24), bg="#4e341d", fg="#FFFFFF")
+fate_label.place(x=845,y=20)
+
+tanodDecision_label = tk.Label(boardspace, text="", font=("Arial", 24), bg="#4e341d", fg="#FFFFFF")
+tanodDecision_label.place(x=845,y=180)
+
+policeDecision_label = tk.Label(boardspace, text="", font=("Arial", 24), bg="#4e341d", fg="#FFFFFF")
+policeDecision_label.place(x=845,y=450)
+
+policeInspection_label = tk.Label(boardspace, text="", font=("Arial", 24), bg="#4e341d", fg="#FFFFFF")
+policeInspection_label.place(x=845,y=600)
+
+diceToss_frame = tk.Frame(boardspace, bg="#384e1d")
+diceToss_frame.pack(pady=500)
+diceToss_frame.place(x=55, y=110)
+
+
+playerFate_Frame = tk.Frame(boardspace, bg="#384e1d")
+playerFate_Frame.pack(pady=500)
+playerFate_Frame.place(x=760,y=120)
+
+tanodDecision_Frame = tk.Frame(boardspace, bg="#384e1d")
+tanodDecision_Frame.pack(pady=500)
+tanodDecision_Frame.place(x=800, y=280)
+
+policeDecicion_Frame = tk.Frame(boardspace,bg="#384e1d")
+policeDecicion_Frame.pack(pady=500)
+policeDecicion_Frame.place(x=810, y=550)
+
+policeInspection_Frame = tk.Frame(boardspace, bg="#384e1d")
+policeInspection_Frame.pack(pady=500)
+policeInspection_Frame.place(x=790,y=700)
+
+
+player1_frame = tk.Frame(boardspace,bg="#384e1d")
+player1_frame.pack(pady= 500)
+player1_frame.place(x=300,y=650)
+
+player2_frame = tk.Frame(boardspace, bg="#384e1d")
+player2_frame.pack(pady= 500)
+player2_frame.place(x=610,y=650)
+
+toss_button = tk.Button(diceToss_frame, text=" 𝗧𝗢𝗦𝗦 𝗧𝗢 𝗠𝗢𝗩𝗘 ", font=("Arial", 15), bg="#384e1d", fg="#FFFFFF", command=roll_Dice)
+toss_button.pack()
+
+chooseFate_button = tk.Button(playerFate_Frame, text="𝗧𝗢𝗦𝗦 𝗪𝗛𝗔𝗧 𝗛𝗔𝗣𝗣𝗘𝗡𝗦 𝗡𝗘𝗫𝗧?", font=("Arial", 15), bg="#384e1d", fg="#FFFFFF", command=choose_Fate)
+chooseFate_button.pack()
+
+
+tanodDecision_button = tk.Button(tanodDecision_Frame, text="𝐓𝐎𝐒𝐒 𝐖𝐇𝐀𝐓'𝐒 𝐓𝐇𝐄 \n𝐓𝐀𝐍𝐎𝐃'𝐒 𝐏𝐋𝐀𝐍", font=("Arial", 15), bg="#384e1d", fg="#FFFFFF", command=Tanod_Decision)
+tanodDecision_button.pack()
+
+policeDecision_button = tk.Button(policeDecicion_Frame, text= "𝐖𝐀𝐈𝐓 𝐀 𝐌𝐈𝐍𝐔𝐓𝐄!", font=("Arial", 15), bg="#384e1d", fg="#FFFFFF", command=police_Decision)
+policeDecision_button.pack()
+
+policeInspection_button = tk.Button(policeInspection_Frame, text= "𝐖𝐄 𝐍𝐄𝐄𝐃 𝐓𝐎 𝐈𝐍𝐒𝐏𝐄𝐂𝐓!", font=("Arial", 15), bg="#384e1d", fg="#FFFFFF", command=police_Inspection)
+policeInspection_button.pack()
+
+
+
+
+selected_player = tk.StringVar()
+selected_player.set("Player 1")
+
+
+def update_turn_buttons():
+    if selected_player.get() == "Player 1":
+        player1_button.config(state="normal")
+        player2_button.config(state="disabled")
+    elif selected_player.get() == "Player 2":
+        player1_button.config(state="disabled")
+        player2_button.config(state="normal")
+
+
+player1_radio = tk.Radiobutton(boardspace, text="Player 1", variable=selected_player, value="Player 1",font=("Arial", 9), bg="#384e1d", fg="#FFFFFF", command=update_turn_buttons,indicatoron=True)
+player1_radio.place(x=50, y=660)
+
+player2_radio = tk.Radiobutton(
+    boardspace, text="Player 2", variable=selected_player, value="Player 2",font=("Arial", 9), bg="#384e1d", fg="#FFFFFF", command=update_turn_buttons,indicatoron=True)
+player2_radio.place(x=50, y=690)
+
+
+player1_wins_gif = "Player1_Win_You_gotArrested.gif"
+player2_wins_gif = "Player2_Win_You_gotArrested.gif"
+
+
+
+gameOver_Label = tk.Label(boardspace, bg="#4e341d")
+gameOver_Label.place(x=350, y=10)
+
+
+
+
+
+player1_currentCell = 0
+player2_currentCell = 0
+
+
+
+def move_character1(direction):
+    global player1_currentCell
+
+    if player1_currentCell >= 36 or player2_currentCell >= 36:
+        return 
+    if direction == 'forward':
+        if player1_currentCell < 36:
+            player1_currentCell += 1
+    elif direction == 'backward':
+        if player1_currentCell > 0:
+            player1_currentCell -= 1
+    elif direction == 'backward_2':
+        if player1_currentCell >= 2:
+            player1_currentCell -= 2
+    elif direction == 'backward_3':
+        if player1_currentCell >= 3:
+            player1_currentCell -= 3
+    if player1_currentCell == 0:
+        canvas.coords(player1, *player1_start_pos)
+    else:
+        row, col = get_coordinates_from_cell(player1_currentCell)
+        newX = 300 + col * 75 + 35
+        newY = 150 + row * 75 + 5
+        canvas.coords(player1, newX, newY)
+    canvas.tag_raise(player1)
+    
+    if player1_currentCell >= 36:
+        gameOver_Label.place(x=350, y=10)
+        gameOver_Label.delete("all")  
+        gameOver_Label.create_image(169, 47, image=player1_wins_gif, anchor='center') 
+        gameOver_Label.config(highlightthickness=0)
+
+
+
+player1_button = tk.Button(
+    player1_frame, text=" 𝐏𝐋𝐀𝐘𝐄𝐑 𝟏 \n𝐌𝐎𝐕𝐄 𝐅𝐎𝐑𝐖𝐀𝐑𝐃", font=("Arial", 15),
+    bg="#384e1d", fg="#FFFFFF", command=lambda: move_character1('forward')
+)
+player1_button.pack()
+
+
+def move_character2(direction):
+    global player2_currentCell
+    
+    if player1_currentCell >= 36 or player2_currentCell >= 36:
+        return
+
+    if direction == 'forward':
+        if player2_currentCell < 36:
+            player2_currentCell += 1
+    elif direction == 'backward':
+        if player2_currentCell > 0:
+            player2_currentCell -= 1
+    elif direction == 'backward_2':
+        if player2_currentCell >= 2:
+            player2_currentCell -= 2
+    elif direction == 'backward_3':
+        if player2_currentCell >= 3:
+            player2_currentCell -= 3
+    if player2_currentCell == 0:
+        canvas.coords(player2, *player2_start_pos)
+    else:
+        row, col = get_coordinates_from_cell(player2_currentCell)
+        newX = 300 + col * 75 + 40
+        newY = 150 + row * 75 + 20
+        canvas.coords(player2, newX, newY)
+    canvas.tag_raise(player2)
+    
+    if player2_currentCell >= 36:
+        gameOver_Label.place(x=350, y=10)
+        gameOver_Label.delete("all")  
+        gameOver_Label.create_image(169, 47, image=player2_wins_gif, anchor='center')
+        gameOver_Label.config(highlightthickness=0)
+
+player2_button = tk.Button(
+    player2_frame, text=" 𝐏𝐋𝐀𝐘𝐄𝐑 𝟐 \n𝐌𝐎𝐕𝐄 𝐅𝐎𝐑𝐖𝐀𝐑𝐃", font=("Arial", 15),
+    bg="#384e1d", fg="#FFFFFF", command=lambda: move_character2('forward')
+)
+player2_button.pack()
+
+
+player2_button.config(state="disabled")
+player1_button.config(state="disabled")
+
+
+update_turn_buttons()
+
+boardspace.bind("<Left>", lambda event: move_character1('backward'))
+boardspace.bind("<Shift-Left>", lambda event: move_character1('backward_2'))
+boardspace.bind("<Control-Left>", lambda event: move_character1('backward_3'))
+boardspace.bind("<Right>", lambda event: move_character2('backward'))
+boardspace.bind("<Shift-Right>", lambda event: move_character2('backward_2'))
+boardspace.bind("<Control-Right>", lambda event: move_character2('backward_3'))
+
+current_gif_animator = None  
+
+def start_new_game():
+    global player1, player2, current_turn, player1_position, player2_position
+    global player1_currentCell, player2_currentCell, game_over_visible, current_gif_animator
+
+    
+    player1_currentCell = 0
+    player2_currentCell = 0
+
+    
+    canvas.coords(player1, *player1_start_pos)
+    canvas.coords(player2, *player2_start_pos)
+
+    
+    gameOver_Label.place_forget()  
+    gameOver_Label.config(bg="#4e341d")  
+
+    
+    if current_gif_animator:
+        current_gif_animator.stop()
+        current_gif_animator = None
+
+    
+    player1_button.config(state="normal")
+    player2_button.config(state="normal")
+    toss_button.config(state="normal")
+
+    
+    selected_player.set("Player 1")
+    update_turn_buttons()
+
+
+    
+def show_about():
+    lore_text = (
+        "Game Rule - Deliver the Item \n Tanod, Police, Thug-3, \n Tanod[Avoid Tanod -1 Tile],[Bribe Tanod +2 ],[Sells you out to the thug -3];Police[Bribe +1],[Inspection LOOP (Suboptions)],[Avoid Police -2],Thug[Contraband You are Arrested! GAME OVER],[Interrogation + LOOP], Then Continue +1"
+        
+    )
+    msgbox.showinfo("About the Game", lore_text)
+
+
+menuBar = Menu(boardspace)
+
+
+gameMenu = Menu(menuBar, tearoff=0,background="Green")
+gameMenu.add_command(label="New Game", command=start_new_game)
+gameMenu.add_separator()
+gameMenu.add_command(label="About", command=show_about)
+gameMenu.add_separator()
+gameMenu.add_command(label="Exit", command=boardspace.quit)
+
+menuBar.add_cascade(label="OPTIONS", menu=gameMenu)
+
+
+
+boardspace.config(menu=menuBar)
+
+
+
+gridboard_levels(offset_x=300, offset_y=150)
+
+
+
+boardspace.mainloop()
+
+
+
+#LORE
+#In the year 2030 there the world is too centralized by big tech and citizens are governed by techno feudalists and theres less income so people have 
+#resorted into freelance transporting of goods, the goods delivered could contain items deemed illegal to the prevailing order. There are main enforcers
+#Police, Tanod and others are bandits and the aim of this game is to deliver the goods to the client to win.
+
+#Three options will be randomly selected in the everytime the player stops in a tile
+#Tanod --> Sub-options
+#Police --> Sub-options
+#Thug -3 Moves
+#Continue + 1 Move
+
+
+
+
+#If Tanod is selected Goes to 3 Possibilities 
+#Avoid Tanod -1 Tile(3)
+#Bribe Tanod +2 Tile(1)
+#Sells you out to the thug -3() -
+#Continue +1(1)
+
+#if Police is randomly in the checkpoint 4 possibilities will happen
+#Bribe +1Tile(1)
+#Inspection LOOP (Suboptions)(2)
+#Avoid Police -2 Tiles (2)
+#Continue +1 Tile (1)
+
+#if the possibility of 'Inspection' will happen 3 possibility branches will occur 
+#Contraband(2) You are Arrested! GAME OVER
+#Continue +1(2)
+#Interrogation + LOOP (2) 
